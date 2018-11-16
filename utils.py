@@ -51,6 +51,13 @@ class SiroButton:
     def get_json(self):
         return self.data
 
+    def set_kyui(self):
+        word = "🐬"
+        self.__data_safe(word)
+        self.set_button_list(word)
+        self.data[word]["button_list"] = [i for i in self.data[word]["button_list"] if i["text"] == word]
+        self.set_complete_button_list(word)
+
     @staticmethod
     def __parser(soup_li):
         a1, a2 = soup_li.find_all('a')
@@ -69,6 +76,19 @@ class SiroButton:
     def save_to_json(self, filename="button_data"):
         with open(filename+".json", "w") as f:
             json.dump(self.data, f, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
+
+
+def create_json_data():
+    sb = SiroButton()
+    sb.set_complete_button_list("いーね")
+    sb.set_complete_button_list("おほほい")
+    sb.set_kyui()
+    sb.set_complete_button_list("ぱいーん")
+    sb.set_complete_button_list("白組さん")
+    sb.set_complete_button_list("救済")
+    sb.set_complete_button_list("なんて日だ")
+    sb.set_complete_button_list("ズンドコ")
+    sb.save_to_json()
 
 
 if __name__ == '__main__':

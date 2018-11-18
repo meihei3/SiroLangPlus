@@ -2,6 +2,7 @@ import json
 
 import requests
 from bs4 import BeautifulSoup
+from pytube import YouTube
 
 
 SIROBUTTON_BASE = "https://sirobutton.herokuapp.com"
@@ -84,14 +85,23 @@ def create_json_data():
     sb.set_complete_button_list("おほほい")
     sb.set_kyui()
     sb.set_complete_button_list("ぱいーん")
-    sb.set_complete_button_list("白組さん")
+    sb.set_complete_button_list("シロ組さん")
     sb.set_complete_button_list("救済")
     sb.set_complete_button_list("なんて日だ")
     sb.set_complete_button_list("ズンドコ")
     sb.save_to_json()
 
 
+def youtube_dl(url: str, name: str = None):
+    dir_path = "./tmp/movies"
+
+    # rename the value of v of query
+    name = url.split("?v=")[-1] if name is None else name
+
+    # youtubeから動画をdl
+    yt = YouTube(url)
+    yt.streams.filter(subtype='mp4').first().download(dir_path, filename=name)
+
+
 if __name__ == '__main__':
-    sb = SiroButton()
-    sb.set_complete_button_list("ズンドコ")
-    sb.save_to_json()
+    create_json_data()

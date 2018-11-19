@@ -1,5 +1,6 @@
 import json
 
+import os
 import requests
 from bs4 import BeautifulSoup
 from pytube import YouTube
@@ -93,7 +94,9 @@ def create_json_data():
 
 
 def youtube_dl(url: str, name: str = None):
-    dir_path = "./tmp/movies"
+    dir_path = "./tmp/videos"
+    if not os.path.isdir(dir_path):
+        os.makedirs(dir_path)
 
     # rename the value of v of query
     name = url.split("?v=")[-1] if name is None else name
@@ -103,5 +106,13 @@ def youtube_dl(url: str, name: str = None):
     yt.streams.filter(subtype='mp4').first().download(dir_path, filename=name)
 
 
+def download_button_videos(button):
+    if not button["use"]:
+        return
+    if not os.path.exists("./tmp/videos" + button["url"].split("?v=")[-1] + ".mp4"):
+        youtube_dl(button["url"])
+
+
 if __name__ == '__main__':
-    create_json_data()
+    # create_json_data()
+    download_button_videos()

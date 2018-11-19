@@ -8,6 +8,17 @@ from pytube import YouTube
 
 SIROBUTTON_BASE = "https://sirobutton.herokuapp.com"
 
+cmd2dir = {
+    "いーね": "iine",
+    "おほほい": "ohohoi",
+    "🐬": "kyui",
+    "ぱいーん": "pain",
+    "シロ組さん": "sirogumisan",
+    "救済": "kyuusai",
+    "なんて日だ": "nantehida",
+    "ズンドコ": "zundoko"
+}
+
 
 class SiroButton:
     def __init__(self):
@@ -113,6 +124,22 @@ def download_button_videos(button):
         youtube_dl(button["url"])
 
 
+def set_resource():
+    if not os.path.exists("button_data.json"):
+        raise FileNotFoundError("create_json_data()関数実行してからやってね")
+
+    with open("button_data.json", 'r') as f:
+        data = json.load(f)
+
+    for key, val in data.items():
+        for button in val['button_list']:
+            download_button_videos(button)
+            button["full_video"] = "./tmp/videos" + button["url"].split("?v=")[-1] + ".mp4"
+
+    with open("button_data.json", "w") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
+
+
 if __name__ == '__main__':
     # create_json_data()
-    download_button_videos()
+    set_resource()

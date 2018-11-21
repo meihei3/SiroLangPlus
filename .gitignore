@@ -148,3 +148,6 @@ Temporary Items
 
 # Intellij IDEA
 *.iml
+
+# video file
+*.mp4

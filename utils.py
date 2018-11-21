@@ -2,9 +2,10 @@ import json
 
 import os
 import requests
+import time
 from bs4 import BeautifulSoup
 from pytube import YouTube
-
+from tqdm import tqdm
 
 SIROBUTTON_BASE = "https://sirobutton.herokuapp.com"
 
@@ -120,8 +121,9 @@ def youtube_dl(url: str, name: str = None):
 def download_button_videos(button):
     if not button["use"]:
         return
-    if not os.path.exists("./tmp/videos" + button["url"].split("?v=")[-1] + ".mp4"):
+    if not os.path.exists("./tmp/videos/" + button["url"].split("?v=")[-1] + ".mp4"):
         youtube_dl(button["url"])
+        time.sleep(7)
 
 
 def set_resource():
@@ -132,9 +134,9 @@ def set_resource():
         data = json.load(f)
 
     for key, val in data.items():
-        for button in val['button_list']:
+        for button in tqdm(val['button_list']):
             download_button_videos(button)
-            button["full_video"] = "./tmp/videos" + button["url"].split("?v=")[-1] + ".mp4"
+            button["full_video"] = "./tmp/videos/" + button["url"].split("?v=")[-1] + ".mp4"
 
     with open("button_data.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))

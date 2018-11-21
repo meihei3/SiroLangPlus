@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 from pytube import YouTube
 from tqdm import tqdm
 
+import subprocess
+
 SIROBUTTON_BASE = "https://sirobutton.herokuapp.com"
 
 cmd2dir = {
@@ -142,6 +144,46 @@ def set_resource():
         json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
 
 
+def slice_video(video_path: str, out_path: str, start: float, end: float):
+    t = str(end - start)
+    subprocess.call(["ffmpeg", "-ss", str(start), "-i", video_path, "-t", t, out_path])
+
+
+def create_cmd_rdir():
+    os.makedirs('./resource/' + cmd2dir["いーね"])
+    os.makedirs('./resource/' + cmd2dir["おほほい"])
+    os.makedirs('./resource/' + cmd2dir["🐬"])
+    os.makedirs('./resource/' + cmd2dir["ぱいーん"])
+    os.makedirs('./resource/' + cmd2dir["シロ組さん"])
+    os.makedirs('./resource/' + cmd2dir["救済"])
+    os.makedirs('./resource/' + cmd2dir["なんて日だ"])
+    os.makedirs('./resource/' + cmd2dir["ズンドコ"])
+
+
+def coordinate_time(t: str):
+    h, m, s = list(map(float, t.split(':')))
+    return 60*60*h + 60*m + s
+
+
+def create_command(button, filename):
+    if not button["use"]:
+        return
+    start, end = list(map(coordinate_time, (button["t"]["start"], button["t"]["end"])))
+    slice_video(button["full_video"], filename, start, end)
+
+
+def set_command_resource():
+    create_cmd_rdir()
+
+    with open("button_data.json", 'r') as f:
+        data = json.load(f)
+
+    for cmd, val in data.items():
+        for i, button in enumerate(tqdm(val['button_list'])):
+            create_command(button, "./resource/"+cmd2dir[cmd]+"/cmd"+str(i)+".mp4")
+
+
 if __name__ == '__main__':
     # create_json_data()
-    set_resource()
+    # set_resource()
+    set_command_resource()

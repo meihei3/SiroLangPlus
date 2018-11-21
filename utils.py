@@ -1,8 +1,11 @@
 import json
 
 import os
+import random
+
 import requests
 import time
+import re
 from bs4 import BeautifulSoup
 from pytube import YouTube
 from tqdm import tqdm
@@ -21,6 +24,22 @@ cmd2dir = {
     "なんて日だ": "nantehida",
     "ズンドコ": "zundoko"
 }
+
+M3U8_FORMAT = """#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-ALLOW-CACHE:YES
+#EXT-X-TARGETDURATION:5
+
+{parts}
+
+#EXT-X-ENDLIST
+"""
+
+M3U8_PARTS_FORMAT = """
+#EXTINF:-1, {name}
+{file_path}
+"""
 
 
 class SiroButton:
@@ -92,6 +111,42 @@ class SiroButton:
     def save_to_json(self, filename="button_data"):
         with open(filename+".json", "w") as f:
             json.dump(self.data, f, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
+
+
+class SiroPlus:
+    def __init__(self):
+        self.command = None
+        self.program = None
+        self.__setup_cmd()
+
+    def set_program(self, text):
+        ptn = "(" + "|".join(list(self.command.keys())) + ")"
+        self.program = re.findall(ptn, text)
+
+    def generate(self, _random=True):
+        parts = "".join([
+            M3U8_PARTS_FORMAT.format(
+                name=cmd,
+                file_path=self.command[cmd]["path"]+random.choice(self.command[cmd]["list"])
+            )
+            for cmd in self.program
+        ])
+        return M3U8_FORMAT.format(parts=parts)
+
+    def __setup_cmd(self):
+        self.command = {
+            "いーねっ！": {"text": "いーね"},
+            "おほほい": {"text": "おほほい"},
+            "ｷｭｰｲ": {"text": "🐬"},
+            "ぱいーん": {"text": "ぱいーん"},
+            "白組さん": {"text": "シロ組さん"},
+            "救済": {"text": "救済"},
+            "なんて日だ！": {"text": "なんて日だ"},
+            "ズンドコズンドコ♪": {"text": "ズンドコ"}
+        }
+        for item in self.command.values():
+            item["path"] = "resource/" + cmd2dir[item["text"]] + "/"
+            item["list"] = os.listdir(item["path"])
 
 
 def create_json_data():
@@ -183,7 +238,14 @@ def set_command_resource():
             create_command(button, "./resource/"+cmd2dir[cmd]+"/cmd"+str(i)+".mp4")
 
 
+def siropp_parser(text):
+    spp = SiroPlus()
+    spp.set_program(text)
+    return spp.generate()
+
+
 if __name__ == '__main__':
     # create_json_data()
     # set_resource()
-    set_command_resource()
+    # set_command_resource()
+    print(siropp_parser("いーねっ！おほほいおほほいおほほいおほほいおほほいおほほいおほほいおほほいおほほい白組さんｷｭｰｲおほほいおほほい"))
